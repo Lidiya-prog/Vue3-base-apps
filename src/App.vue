@@ -3,7 +3,11 @@
     <TaskInput @onAddTask="addTask"></TaskInput>
     <span class="loader" v-if="isLoading"></span>
     <ul class="task-list my-list">
-      <li v-for="item in taskList" :key="item.id">
+      <li
+        v-for="item in taskList"
+        :key="item.id"
+        :class="item.comleted ? 'todo-row complete' : 'todo-row'"
+      >
         <TaskCard
           @onRemove="removeTask(item.id)"
           @onDone="setDoneTask(item.id)"

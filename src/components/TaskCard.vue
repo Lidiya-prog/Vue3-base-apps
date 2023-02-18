@@ -1,5 +1,5 @@
 <template>
-  <div :class="model.comleted ? 'todo-row complete' : 'todo-row'">
+  <div :class="{ card: true, complete: model.comleted }">
     <div>
       <h4>{{ model.title }}</h4>
     </div>
@@ -27,6 +27,7 @@ export default {
       }
     }
   },
+
   setup(props, { emit }) {
     const emitOnDone = () => {
       emit('onDone')

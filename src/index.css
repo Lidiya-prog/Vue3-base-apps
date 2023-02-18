@@ -95,9 +95,6 @@ h4 {
 }
 
 .todo-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin: 4px auto;
   color: #fff;
   background: linear-gradient(
@@ -135,6 +132,11 @@ h4 {
   );
 }
 
+.card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
 .loader {
   display: flex;
