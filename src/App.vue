@@ -52,11 +52,11 @@ export default {
 
     const fetchTasks = async () => {
       const response = await fetch('https://jsonplaceholder.typicode.com/todos')
-      const test = await response.json()
-      return test.map(item => ({
-        id: item.id,
-        completed: item.completed,
-        title: item.title,
+      const tasks = await response.json()
+      return tasks.map(task => ({
+        id: task.id,
+        completed: task.completed,
+        title: task.title,
       }))
     }
 
