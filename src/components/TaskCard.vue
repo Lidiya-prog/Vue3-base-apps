@@ -1,8 +1,6 @@
 <template>
   <div :class="{ card: true, complete: model.comleted }">
-    <div>
-      <h4>{{ model.title }}</h4>
-    </div>
+    <input v-model="task.title" type="text" @input="$emit('onEdit')" />
     <div>
       <div @click="emitOnDone" v-if="!model.completed">
         <unicon name="check-circle"></unicon>
@@ -46,6 +44,14 @@ export default {
 </script>
 
 <style scoped>
+input {
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 16px;
+  font-weight: 600;
+}
 .task-card {
   display: flex;
   justify-content: space-between;
