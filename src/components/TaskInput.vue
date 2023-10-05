@@ -5,33 +5,21 @@
   </div>
 </template>
 
-<script>
-import { ref } from 'vue'
+<script setup>
+import { ref, defineEmits } from 'vue';
 
-export default {
-  emits: {
-    onAddTask({ title }) {
-      if(title === '') {
-        alert('Fill some info please!')
-        return false
-      }
-      return true
-    }
-  },
-  setup(props, { emit }) {
-    const title = ref('')
+const title = ref('');
 
-    const onAddTask = () => {
-      emit('onAddTask', { title: title.value })
-      title.value = ''
-    }
-
-    return {
-      title,
-      onAddTask
-    }
+const onAddTask = () => {
+  if (title.value === '') {
+    alert('Fill some info please!');
+    return;
   }
-}
+  emit('onAddTask', { title: title.value });
+  title.value = '';
+};
+
+const { emit } = defineEmits(['onAddTask']);
 </script>
 
 <style scoped>

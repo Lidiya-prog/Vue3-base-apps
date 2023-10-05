@@ -4,45 +4,43 @@
       <h4>{{ model.title }}</h4>
     </div>
     <div>
-      <div @click="emitOnDone" v-if="!model.completed">
-        <unicon name="check-circle"></unicon>
+      <div class="check-circle" v-if="!model.completed">
+        <check-circle-outline @click="emitOnDone"></check-circle-outline>
       </div>
       <div @click="emitOnRemove" v-else>
-        <unicon name="times-circle"></unicon>
+        <close-circle-outline></close-circle-outline>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  emits: ['onDone', 'onRemove'],
-  props: {
-    model: {
-      required: true,
-      default: {
-        id: 0,
-        title: 'Create video',
-        completed: false
-      }
-    }
-  },
+<script setup>
+import CloseCircleOutline from 'vue-material-design-icons/CloseCircleOutline.vue';
+import CheckCircleOutline from 'vue-material-design-icons/CheckCircleOutline.vue';
 
-  setup(props, { emit }) {
-    const emitOnDone = () => {
-      emit('onDone')
-    }
-
-    const emitOnRemove = () => {
-      emit('onRemove')
-    }
-
-    return {
-      emitOnDone,
-      emitOnRemove
-    }
+const props = defineProps({
+  model: {
+    type: Object,
+    required: true,
+    default: () => ({
+      id: 0,
+      title: 'Create video',
+      completed: false
+    })
   }
-}
+});
+
+const { model } = props;
+
+const emits = defineEmits(['onDone', 'onRemove']);
+
+const emitOnDone = () => {
+  emits('onDone', model.id);
+};
+
+const emitOnRemove = () => {
+  emits('onRemove');
+};
 </script>
 
 <style scoped>
