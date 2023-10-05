@@ -1,49 +1,45 @@
 <template>
-  <div :class="{ card: true, complete: model.comleted }">
+  <div :class="{ card: true, complete: task.comleted }">
+    <input v-model="task.title" type="text" @input="$emit('onEdit')" />
     <div>
-      <h4>{{ model.title }}</h4>
-    </div>
-    <div>
-      <div class="check-circle" v-if="!model.completed">
-        <check-circle-outline @click="emitOnDone"></check-circle-outline>
+      <div class="check-circle" v-if="!task.completed">
+        <check-circle-outline @click="$emit('onDone')" />
       </div>
-      <div @click="emitOnRemove" v-else>
-        <close-circle-outline></close-circle-outline>
+      <div @click="$emit('onRemove')" v-else>
+        <close-circle-outline />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import CloseCircleOutline from 'vue-material-design-icons/CloseCircleOutline.vue';
-import CheckCircleOutline from 'vue-material-design-icons/CheckCircleOutline.vue';
+import CloseCircleOutline from "vue-material-design-icons/CloseCircleOutline.vue";
+import CheckCircleOutline from "vue-material-design-icons/CheckCircleOutline.vue";
 
-const props = defineProps({
-  model: {
+defineProps({
+  task: {
     type: Object,
     required: true,
     default: () => ({
       id: 0,
-      title: 'Create video',
-      completed: false
-    })
-  }
+      title: "Create video",
+      completed: false,
+    }),
+  },
 });
 
-const { model } = props;
-
-const emits = defineEmits(['onDone', 'onRemove']);
-
-const emitOnDone = () => {
-  emits('onDone', model.id);
-};
-
-const emitOnRemove = () => {
-  emits('onRemove');
-};
+defineEmits(["onDone", "onRemove", "onEdit"]);
 </script>
 
 <style scoped>
+input {
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 16px;
+  font-weight: 600;
+}
 .task-card {
   display: flex;
   justify-content: space-between;

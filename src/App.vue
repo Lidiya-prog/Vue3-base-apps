@@ -1,7 +1,7 @@
 <template>
   <main class="todo-app">
-    <TaskInput @onAddTask="addTask"></TaskInput>
-    <span class="loader" v-if="isLoading"></span>
+    <TaskInput v-model:title="title" @onAddTask="addTask" />
+    <span class="loader" v-if="isLoading" />
     <ul class="task-list my-list">
       <li
         v-for="item in taskList"
@@ -11,7 +11,8 @@
         <TaskCard
           @onRemove="removeTask(item.id)"
           @onDone="setDoneTask(item.id)"
-          :model="item"
+          @onEdit="editTask(item.id)"
+          :task="item"
         />
       </li>
     </ul>
@@ -21,48 +22,70 @@
 <script setup>
 import TaskInput from "./components/TaskInput.vue";
 import TaskCard from "./components/TaskCard.vue";
-import {onMounted, ref} from 'vue';
+import { onMounted, ref } from "vue";
 
-const taskList = ref([])
+const taskList = ref([]);
+const title = ref("");
+const isLoading = ref(false);
 
-const isLoading = ref(false)
+const addTask = () => {
+  if (title.value === "") {
+    alert("Fill some info please!");
+    return;
+  }
+  const nextId = taskList.value[taskList.value.length - 1].id + 1;
 
-const addTask = ({title}) => {
-  taskList.value = [...taskList.value, {id: taskList.value[taskList.value.length - 1].id + 1, title, completed: false}]
-}
+  taskList.value = [
+    ...taskList.value,
+    { id: nextId, title: title.value, completed: false },
+  ];
+  title.value = "";
+};
 
 const setDoneTask = (id) => {
-  debugger;
-  taskList.value = taskList.value.map(item => {
-    if(item.id === id)
-      item.completed = true
-    return item
-  })
-}
+  taskList.value = taskList.value.map((item) => {
+    if (item.id === id) item.completed = true;
+    return item;
+  });
+};
 
 const removeTask = (id) => {
-  taskList.value = taskList.value.filter(item => item.id !== id)
-}
+  taskList.value = taskList.value.filter((item) => item.id !== id);
+};
 
 const fetchTasks = async () => {
-  const response = await fetch('https://jsonplaceholder.typicode.com/todos')
-  const tasks = await response.json()
-  return tasks.map(task => ({
+  const tasks = await fetch("https://jsonplaceholder.typicode.com/todos").then(
+    (res) => res.json()
+  );
+  taskList.value = tasks.splice(0, 10).map((task) => ({
     id: task.id,
     completed: task.completed,
     title: task.title,
-  }))
-}
+  }));
+
+  return taskList.value;
+};
+
+const editTask = (id) => {
+  const currentIndex = taskList.value.findIndex((task) => task.id === id);
+
+  const newTask = {
+    completed: false,
+    id,
+    title: "new text",
+  };
+  taskList.value[currentIndex] = newTask;
+};
 
 onMounted(async () => {
-  isLoading.value = true
-  taskList.value = await fetchTasks()
-  isLoading.value = false
-})
+  isLoading.value = true;
+  await fetchTasks();
+  isLoading.value = false;
+});
 </script>
 
 <style scoped>
-  .task-list {
-    list-style: none;
-  }
+.task-list {
+  list-style: none;
+}
 </style>
