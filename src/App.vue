@@ -57,7 +57,7 @@ const fetchTasks = async () => {
   const tasks = await fetch("https://jsonplaceholder.typicode.com/todos").then(
     (res) => res.json()
   );
-  taskList.value = tasks.splice(0, 10).map((task) => ({
+  taskList.value = tasks.map((task) => ({
     id: task.id,
     completed: task.completed,
     title: task.title,
