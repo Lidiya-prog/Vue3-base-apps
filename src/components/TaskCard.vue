@@ -3,9 +3,9 @@
     <input v-model="task.title" type="text" @input="$emit('onEdit')" />
     <div>
       <div class="check-circle" v-if="!task.completed">
-        <check-circle-outline @click="$emit('onDone')" />
+        <check-circle-outline class="test" @click="$emit('onDone')" />
       </div>
-      <div @click="$emit('onRemove')" v-else>
+      <div class="delete-circle" @click="$emit('onRemove')" v-else>
         <close-circle-outline />
       </div>
     </div>
