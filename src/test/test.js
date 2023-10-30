@@ -1,8 +1,6 @@
 // import puppeteer from 'puppeteer';
 const puppeteer = require('puppeteer');
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 // (async () => {
 // 	browser = await puppeteer.launch();
 // 	page = await browser.newPage();
@@ -16,9 +14,42 @@ describe('Button Test', () => {
 	let page;
 
 	beforeAll(async () => {
-		browser = await puppeteer.launch();
+		browser = await puppeteer.launch({
+			headless: false,
+			// Уровень логирования (например, 'info' или 'error').
+			// Установите уровень, который включает вывод логов в консоль.
+			logLevel: 'silent',
+		});
 		page = await browser.newPage();
-		await page.goto('http://localhost:5173/'); // Замените URL на адрес вашего приложения Vue
+		await page.goto('http://localhost:5174/'); // Замените URL на адрес вашего приложения Vue
+
+		// Выполняем запрос к API и дожидаемся загрузки данных
+		await page.evaluate(async () => {
+			console.log('Hello');
+			const tasks = await fetch(
+				'https://jsonplaceholder.typicode.com/todos'
+			).then((res) => res.json());
+			window.taskList = tasks.map((task) => ({
+				id: task.id,
+				completed: task.completed,
+				title: task.title,
+			}));
+			console.log('Hello2');
+		});
+
+		// await page.waitForRequest(
+		// 	(request) =>
+		// 		request.url() === 'https://jsonplaceholder.typicode.com/todos'
+		// );
+
+		// await page.waitForFunction(() => {
+		// 	const dataRendered = document.querySelector('.check-circle');
+		// 	return dataRendered !== null;
+		// });
+
+		// await page.evaluate(async () => {
+		// 	console.log('Hello3');
+		// });
 	});
 
 	afterAll(async () => {
@@ -35,46 +66,53 @@ describe('Button Test', () => {
 		// });
 
 		const buttonSelectors = '.check-circle'; // Селектор для всех кнопок
-		// const buttons = await page.$$(buttonSelectors); // Получаем все кнопки
-		const buttons = document.querySelectorAll('.check-circle'); // Получаем все кнопки
+		const buttons = await page.$$(buttonSelectors); // Получаем все кнопки
+		await page.evaluate(async () => {
+			console.log(document.querySelectorAll('.check-circle'));
+			console.log('Hello3');
+		});
+		// const buttons = document.querySelectorAll(buttonSelectors); // Получаем все кнопки
 		// console.log(buttons);
 
 		// Проверяем, что количество кнопок соответствует ожидаемому количеству (200)
 		// expect(buttons.length).toBe(200);
 
-		// Проходим по каждой кнопке и выполним необходимые действия
-		for (let i = 0; i < 10; i++) {
-			const button = buttons[i];
+		if (buttons.length) {
+			console.log('Hello4');
+			// Проходим по каждой кнопке и выполним необходимые действия
+			for (let i = 0; i < 10; i++) {
+				const button = buttons[i];
 
-			// Засекаем начальное время
-			const startTime = performance.now();
-			await button.click();
+				// Засекаем начальное время
+				const startTime = performance.now();
+				await button.click();
 
-			// Ожидаем, пока состояние элемента массива не изменится
-			await page.waitForFunction(
-				(index) => vm.$data.tasks[index].completed === true,
-				{},
-				i
-			);
+				// Ожидаем, пока состояние элемента массива не изменится
+				await page.waitForFunction(
+					(index) => vm.$data.tasks[index].completed === true,
+					{},
+					i
+				);
 
-			// Засекаем конечное время
-			const endTime = performance.now();
+				// Засекаем конечное время
+				const endTime = performance.now();
 
-			// Вычисляем время выполнения операции в миллисекундах
-			const executionTime = endTime - startTime;
+				// Вычисляем время выполнения операции в миллисекундах
+				const executionTime = endTime - startTime;
 
-			// Добавьте проверки, которые соответствуют вашим ожиданиям после клика на каждую кнопку
-			// В данном случае, мы ожидаем, что состояние элемента массива будет равно true
-			const isTaskCompleted = await page.evaluate((index) => {
-				// Здесь index - это индекс текущей кнопки в массиве
-				return vm.$data.tasks[index].completed; // vm - экземпляр вашего компонента Vue
-			}, i);
+				// Добавьте проверки, которые соответствуют вашим ожиданиям после клика на каждую кнопку
+				// В данном случае, мы ожидаем, что состояние элемента массива будет равно true
+				const isTaskCompleted = await page.evaluate((index) => {
+					// Здесь index - это индекс текущей кнопки в массиве
+					return vm.$data.tasks[index].completed; // vm - экземпляр вашего компонента Vue
+				}, i);
 
-			expect(isTaskCompleted).toBe(true);
+				expect(isTaskCompleted).toBe(true);
 
-			console.log(`Execution Time for Button ${i + 1}: ${executionTime} ms`);
+				console.log(`Execution Time for Button ${i + 1}: ${executionTime} ms`);
+			}
 		}
-	});
+	}, 1000000);
 });
 // const puppeteer = require('puppeteer');
 
