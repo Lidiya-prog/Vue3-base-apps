@@ -2,9 +2,9 @@
   <div :class="{ card: true, complete: task.comleted }">
     <input v-model="task.title" type="text" @input="$emit('onEdit')" />
     <div>
-      <div class="check-circle" v-if="!task.completed">
-        <check-circle-outline class="test" @click="$emit('onDone')" />
-      </div>
+      <button class="check-circle" v-if="!task.completed" @click="$emit('onDone')">
+        <check-circle-outline class="test"  />
+      </button>
       <div class="delete-circle" @click="$emit('onRemove')" v-else>
         <close-circle-outline />
       </div>

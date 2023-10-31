@@ -23,19 +23,28 @@ describe('Button Test', () => {
 		page = await browser.newPage();
 		await page.goto('http://localhost:5174/'); // Замените URL на адрес вашего приложения Vue
 
+		const vm = await page.evaluate(() => window.vm);
+
 		// Выполняем запрос к API и дожидаемся загрузки данных
 		await page.evaluate(async () => {
 			console.log('Hello');
+			console.log(vm);
 			const tasks = await fetch(
 				'https://jsonplaceholder.typicode.com/todos'
 			).then((res) => res.json());
-			window.taskList = tasks.map((task) => ({
+			vm.taskList = tasks.map((task) => ({
 				id: task.id,
-				completed: task.completed,
+				completed: false,
 				title: task.title,
 			}));
+			window.vm.taskList = tasks;
 			console.log('Hello2');
+			console.log(vm.taskList);
+			// console.log(window.vm.taskList);
 		});
+		await page.waitForFunction(() => vm.taskList !== undefined);
+
+		await page.waitForTimeout(2000);
 
 		// await page.waitForRequest(
 		// 	(request) =>
@@ -49,6 +58,7 @@ describe('Button Test', () => {
 
 		// await page.evaluate(async () => {
 		// 	console.log('Hello3');
+		// 	console.log(window.vm);
 		// });
 	});
 
@@ -78,23 +88,35 @@ describe('Button Test', () => {
 		// expect(buttons.length).toBe(200);
 
 		if (buttons.length) {
-			console.log('Hello4');
+			await page.evaluate(async () => {
+				console.log('hello4');
+			});
 			// Проходим по каждой кнопке и выполним необходимые действия
-			for (let i = 0; i < 10; i++) {
+			for (let i = 0; i < 1; i++) {
 				const button = buttons[i];
 
 				// Засекаем начальное время
+				await page.evaluate(async () => {
+					console.log(performance.now());
+				});
 				const startTime = performance.now();
 				await button.click();
 
+				await page.evaluate(async () => {
+					console.log(vm.taskList[0].completed);
+				});
+
 				// Ожидаем, пока состояние элемента массива не изменится
 				await page.waitForFunction(
-					(index) => vm.$data.tasks[index].completed === true,
+					(index) => vm.taskList[index].completed === true,
 					{},
 					i
 				);
 
 				// Засекаем конечное время
+				await page.evaluate(async () => {
+					console.log(performance.now());
+				});
 				const endTime = performance.now();
 
 				// Вычисляем время выполнения операции в миллисекундах
@@ -104,7 +126,7 @@ describe('Button Test', () => {
 				// В данном случае, мы ожидаем, что состояние элемента массива будет равно true
 				const isTaskCompleted = await page.evaluate((index) => {
 					// Здесь index - это индекс текущей кнопки в массиве
-					return vm.$data.tasks[index].completed; // vm - экземпляр вашего компонента Vue
+					return vm.taskList[index].completed; // vm - экземпляр вашего компонента Vue
 				}, i);
 
 				expect(isTaskCompleted).toBe(true);
@@ -112,7 +134,7 @@ describe('Button Test', () => {
 				console.log(`Execution Time for Button ${i + 1}: ${executionTime} ms`);
 			}
 		}
-	}, 1000000);
+	});
 });
 // const puppeteer = require('puppeteer');
 
