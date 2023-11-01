@@ -59,7 +59,7 @@ const fetchTasks = async () => {
   );
   taskList.value = tasks.map((task) => ({
     id: task.id,
-    completed: task.completed,
+    completed: false,
     title: task.title,
   }));
 

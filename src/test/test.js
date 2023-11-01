@@ -1,5 +1,6 @@
 // import puppeteer from 'puppeteer';
 const puppeteer = require('puppeteer');
+const fs = require('fs');
 
 // (async () => {
 // 	browser = await puppeteer.launch();
@@ -26,40 +27,40 @@ describe('Button Test', () => {
 		const vm = await page.evaluate(() => window.vm);
 
 		// Выполняем запрос к API и дожидаемся загрузки данных
-		await page.evaluate(async () => {
-			console.log('Hello');
-			console.log(vm);
-			const tasks = await fetch(
-				'https://jsonplaceholder.typicode.com/todos'
-			).then((res) => res.json());
-			vm.taskList = tasks.map((task) => ({
-				id: task.id,
-				completed: false,
-				title: task.title,
-			}));
-			window.vm.taskList = tasks;
-			console.log('Hello2');
-			console.log(vm.taskList);
-			// console.log(window.vm.taskList);
-		});
-		await page.waitForFunction(() => vm.taskList !== undefined);
+		// await page.evaluate(async () => {
+		// 	console.log('Hello');
+		// 	console.log(vm);
+		// 	const tasks = await fetch(
+		// 		'https://jsonplaceholder.typicode.com/todos'
+		// 	).then((res) => res.json());
+		// 	vm.taskList = tasks.map((task) => ({
+		// 		id: task.id,
+		// 		completed: false,
+		// 		title: task.title,
+		// 	}));
+		// 	window.vm.taskList = tasks;
+		// 	console.log('Hello2');
+		// 	console.log(vm.taskList);
+		// 	// console.log(window.vm.taskList);
+		// });
+		// await page.waitForFunction(() => vm.taskList !== undefined);
 
-		await page.waitForTimeout(2000);
+		// await page.waitForTimeout(2000);
 
-		// await page.waitForRequest(
-		// 	(request) =>
-		// 		request.url() === 'https://jsonplaceholder.typicode.com/todos'
-		// );
+		// await page.waitForRequest((request) => {
+		// 	console.log('wait...');
+		// 	return request.url() === 'https://jsonplaceholder.typicode.com/todos';
+		// });
 
 		// await page.waitForFunction(() => {
 		// 	const dataRendered = document.querySelector('.check-circle');
 		// 	return dataRendered !== null;
 		// });
 
-		// await page.evaluate(async () => {
-		// 	console.log('Hello3');
-		// 	console.log(window.vm);
-		// });
+		await page.evaluate(async () => {
+			console.log('Hello3');
+			console.log(window.vm.taskList);
+		});
 	});
 
 	afterAll(async () => {
@@ -92,11 +93,12 @@ describe('Button Test', () => {
 				console.log('hello4');
 			});
 			// Проходим по каждой кнопке и выполним необходимые действия
-			for (let i = 0; i < 1; i++) {
+			for (let i = 0; i < buttons.length - 1; i++) {
 				const button = buttons[i];
 
 				// Засекаем начальное время
 				await page.evaluate(async () => {
+					fs.writeFileSync('output.txt', performance.now(), 'utf-8');
 					console.log(performance.now());
 				});
 				const startTime = performance.now();
