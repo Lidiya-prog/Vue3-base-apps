@@ -24,7 +24,7 @@ import TaskInput from "./components/TaskInput.vue";
 import TaskCard from "./components/TaskCard.vue";
 import { onMounted, ref } from "vue";
 
-const taskList = ref([]);
+const taskList = ref(null);
 const title = ref("");
 const isLoading = ref(false);
 
