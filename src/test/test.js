@@ -71,7 +71,7 @@ describe('Button Test', () => {
 					i
 				);
 
-				result.push(executionTime);
+				result.push([i + 1, executionTime]);
 				// Добавьте проверки, которые соответствуют вашим ожиданиям после клика на каждую кнопку
 				// В данном случае, мы ожидаем, что состояние элемента массива будет равно true
 				const isTaskCompleted = await page.evaluate((index) => {
@@ -83,7 +83,7 @@ describe('Button Test', () => {
 			}
 
 			await page.evaluate(async (res) => {
-				console.log(String(res));
+				console.log(res);
 			}, result);
 		}
 	});
