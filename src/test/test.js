@@ -1,90 +1,107 @@
-#!/usr/bin/env node
-const puppeteer = require('puppeteer');
+import puppeteer from 'puppeteer';
+import lighthouse from 'lighthouse';
+import { URL } from 'url';
 
-describe('Button Test', () => {
-	let browser;
-	let page;
+async function runTest() {
+	const browser = await puppeteer.launch({
+		headless: true,
+		logLevel: 'silent',
+	});
+	const page = await browser.newPage();
 
-	beforeAll(async () => {
-		browser = await puppeteer.launch({
-			headless: false,
-			logLevel: 'silent',
-		});
-		page = await browser.newPage();
-		await page.goto('http://localhost:5174/'); // Замените URL на адрес вашего приложения Vue
+	try {
+		// Замените на URL вашего приложения
+		const targetUrl = 'http://localhost:5173/';
+		await page.goto(targetUrl);
+
+		const lighthouseResult = await runLighthouse(page, browser);
+
+		console.log('Lighthouse Report:', lighthouseResult);
 
 		// Выполняем запрос к API и дожидаемся загрузки данных
 		await page.evaluate(async () => {
+			console.log('Hello');
+
 			const tasks = await fetch(
 				'https://jsonplaceholder.typicode.com/todos'
 			).then((res) => res.json());
-			window.vm.taskList = tasks.map((task) => ({
+			window.vm.$data.taskList = tasks.map((task) => ({
 				id: task.id,
 				completed: false,
 				title: task.title,
 			}));
 		});
-	});
 
-	afterAll(async () => {
-		await browser.close();
-	});
+		await page.waitForFunction(() => window.vm.$data.taskList !== null);
 
-	test('Check if Buttons are Clickable and Measure Time', async () => {
-		await page.waitForFunction(() => window.vm.taskList !== null);
+		// Проходим по каждой кнопке и замеряем время
+		const buttons = await page.$$('.check-circle'); // Замените на селектор ваших кнопок
 
-		await page.waitForSelector('.check-circle');
-
-		const buttonSelectors = '.check-circle'; // Селектор для всех кнопок
-		const buttons = await page.$$(buttonSelectors); // Получаем все кнопки
-
+		const res = [];
 		const result = [];
 
-		if (buttons.length) {
-			await page.evaluate(async () => {
-				console.log(window.vm.taskList);
-				console.log('hello4');
-			});
-			// Проходим по каждой кнопке и выполним необходимые действия
-			for (let i = 0; i < buttons.length; i++) {
-				const button = buttons[i];
+		for (let i = 0; i < buttons.length; i++) {
+			const button = buttons[i];
+			// const startTime = Date.now();
 
-				// Засекаем начальное время
-				const startTime = performance.now();
-				await button.click();
+			// Нажимаем на кнопку
+			await button.click();
 
-				await page.evaluate(async (index) => {
-					window.vm.taskList[index].completed = true;
-				}, i);
+			// Замеряем время, прошедшее с момента клика до полной отрисовки
+			const renderTime = await measureRenderTime(page);
 
-				// Засекаем конечное время
-				const endTime = performance.now();
+			// console.log(`Button ${i + 1} Render Time: ${renderTime} ms`);
 
-				// Вычисляем время выполнения операции в миллисекундах
-				const executionTime = endTime - startTime;
+			res.push([i + 1, renderTime]);
+			result.push(renderTime);
 
-				await page.evaluate(
-					async (time, index) => {
-						console.log(`Execution Time for Button ${index + 1}: ${time} ms`);
-					},
-					executionTime,
-					i
-				);
+			// const endTime = Date.now();
 
-				result.push([i + 1, executionTime]);
-				// Добавьте проверки, которые соответствуют вашим ожиданиям после клика на каждую кнопку
-				// В данном случае, мы ожидаем, что состояние элемента массива будет равно true
-				const isTaskCompleted = await page.evaluate((index) => {
-					// Здесь index - это индекс текущей кнопки в массиве
-					return window.vm.taskList[index].completed;
-				}, i);
-
-				expect(isTaskCompleted).toBe(true);
-			}
-
-			await page.evaluate(async (res) => {
-				console.log(res);
-			}, result);
+			// console.log(`Button ${i + 1} Total Time: ${endTime - startTime} ms`);
 		}
+
+		console.log(res.slice(0, 100));
+		console.log(res.slice(100));
+		console.log(result.slice(0, 100));
+		console.log(result.slice(100));
+	} catch (error) {
+		console.error('Test failed:', error);
+	}
+}
+
+async function runLighthouse(page, browser) {
+	const lighthouseConfig = {
+		extends: 'lighthouse:default',
+		settings: {
+			onlyCategories: ['performance'],
+		},
+	};
+
+	const options = {
+		port: new URL(browser.wsEndpoint()).port,
+		output: 'json',
+	};
+
+	const lighthouseResult = await lighthouse(
+		page.url(),
+		options,
+		lighthouseConfig
+	);
+	return lighthouseResult.lhr;
+}
+
+async function measureRenderTime(page) {
+	return page.evaluate(() => {
+		const renderStart = performance.now();
+
+		// Ждем события, которое говорит о том, что отрисовка завершена
+		return new Promise((resolve) => {
+			requestAnimationFrame(() => {
+				const renderEnd = performance.now();
+				resolve(renderEnd - renderStart);
+			});
+		});
 	});
-});
+}
+
+runTest();
